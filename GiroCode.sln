@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GiroCode", "GiroCode\GiroCode.csproj", "{ACDC6655-9D85-4652-B2ED-9204588F09F9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GiroCodeTests", "GiroCodeTests\GiroCodeTests.csproj", "{C7427A05-2C01-422C-9656-D723ACFCF7FE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SolutionFiles", "SolutionFiles", "{C32159A6-4E57-471D-AF2E-9F10F67C5EA6}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		README.md = README.md
+		.github\workflows\dotnet.yml = .github\workflows\dotnet.yml
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{ACDC6655-9D85-4652-B2ED-9204588F09F9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{ACDC6655-9D85-4652-B2ED-9204588F09F9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{ACDC6655-9D85-4652-B2ED-9204588F09F9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{ACDC6655-9D85-4652-B2ED-9204588F09F9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C7427A05-2C01-422C-9656-D723ACFCF7FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C7427A05-2C01-422C-9656-D723ACFCF7FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C7427A05-2C01-422C-9656-D723ACFCF7FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C7427A05-2C01-422C-9656-D723ACFCF7FE}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
