@@ -7,6 +7,8 @@
         <Nullable>enable</Nullable>
         <RepositoryUrl>https://github.com/kenan-kajkus/GiroCode</RepositoryUrl>
         <TargetFrameworks>net8.0;net6.0</TargetFrameworks>
+        <GenerateDocumentationFile>True</GenerateDocumentationFile>
+        <DebugType>Embedded</DebugType>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="SkiaSharp" Version="2.88.6" />
