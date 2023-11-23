@@ -1,9 +1,12 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
+        <PackageId>GiroCode</PackageId>
+        <Authors>kenan-kajkus</Authors>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
+        <RepositoryUrl>https://github.com/kenan-kajkus/GiroCode</RepositoryUrl>
+        <TargetFrameworks>net8.0;net6.0</TargetFrameworks>
     </PropertyGroup>
     <ItemGroup>
         <PackageReference Include="SkiaSharp" Version="2.88.6" />
