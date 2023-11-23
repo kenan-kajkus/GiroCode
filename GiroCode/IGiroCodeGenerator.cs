@@ -10,6 +10,7 @@ public interface IGiroCodeGenerator
     /// <param name="remittance">The remittance.</param>
     /// <param name="amount">The amount.</param>
     /// <param name="bic">The bic.</param>
+    /// <param name="reference">The external reference</param>
     /// <param name="charSet">The character set.</param>
     /// <returns>giro code as byte array</returns>
     byte[] GenerateGiroCode(
@@ -17,6 +18,7 @@ public interface IGiroCodeGenerator
         string iban,
         string remittance,
         decimal amount,
-        string bic,
+        string? bic,
+        string? reference,
         CharSet charSet = CharSet.Utf8);
 }

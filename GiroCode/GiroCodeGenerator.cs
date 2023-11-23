@@ -6,10 +6,16 @@ namespace GiroCode;
 
 public class GiroCodeGenerator : IGiroCodeGenerator
 {
-    #region Fields
+    #region constants
+    
+    private const int StrokeWidth = 5;
+    private const int YOffset = 15;
+    private const string Br = "\n";
+    
+    #endregion      
+    
+    #region fields
 
-    private readonly int _strokeWidth = 5;
-    private readonly int _yOffset = 15;
     private readonly int _textSize = 20;
     private readonly string _giroCodeText = "Giro-Code";
 
@@ -29,7 +35,7 @@ public class GiroCodeGenerator : IGiroCodeGenerator
         _giroCodeText = giroCodeText;
         _textSize = textSize;
     }
-    
+
     /// <summary>
     /// Generates the giro code.
     /// </summary>
@@ -38,6 +44,7 @@ public class GiroCodeGenerator : IGiroCodeGenerator
     /// <param name="remittance">The remittance.</param>
     /// <param name="amount">The amount.</param>
     /// <param name="bic">The bic.</param>
+    /// <param name="reference">External reference</param>
     /// <param name="charSet">The character set.</param>
     /// <returns>giro code as byte array</returns>
     public byte[] GenerateGiroCode(
@@ -45,7 +52,8 @@ public class GiroCodeGenerator : IGiroCodeGenerator
         string iban,
         string remittance,
         decimal amount,
-        string bic,
+        string? bic,
+        string? reference = null,
         CharSet charSet = CharSet.Utf8)
     {
         byte[] qrCode;
@@ -56,9 +64,9 @@ public class GiroCodeGenerator : IGiroCodeGenerator
                 throw new Exception("IbanIsEmpty");
 
             var ibanNormalized = iban.Trim();
-            var barcodeContent = GenerateQrCodeContent(beneficiary, ibanNormalized, remittance, amount, bic, charSet: charSet);
+            var barcodeContent = GenerateQrCodeContent(beneficiary, ibanNormalized, remittance, amount, bic, reference, charSet: charSet);
             if (!IsBarCodeValid(barcodeContent, charSet))
-                throw new Exception("IbanIsInvalid");
+                throw new Exception("Barcode exceeds binary size limit");
 
             qrCode = GenerateQrCode(barcodeContent);
         }
@@ -78,6 +86,7 @@ public class GiroCodeGenerator : IGiroCodeGenerator
     /// <param name="remittance">The remittance.</param>
     /// <param name="amount">The amount.</param>
     /// <param name="bic">The bic.</param>
+    /// <param name="reference">The external reference</param>
     /// <param name="charSet">The character set.</param>
     /// <returns>qr code as string</returns>
     private string GenerateQrCodeContent(
@@ -85,36 +94,41 @@ public class GiroCodeGenerator : IGiroCodeGenerator
         string iban,
         string remittance,
         decimal amount,
-        string bic = null,
+        string? bic = null,
+        string? reference = null,
         CharSet charSet = CharSet.Utf8)
     {
-        var barcodeContent =
-            /* Service tag */
-            "BCD\r\n" +
-            /* Version */
-            "002\r\n" +
-            /* Character set */
-            $"{(int)charSet}\r\n" +
-            /* SEPA Credit Transfer */
-            "SCT\r\n" +
-            /* Recipient's BIC */
-            $"{bic}\r\n" +
-            /* Recipient's name */
-            $"{beneficiary}\r\n" +
-            /* Recipient's IBAN */
-            $"{iban}\r\n" +
-            /* Amount */
-            $"EUR{amount.ToString("F", CultureInfo.InvariantCulture)}\r\n" +
-            /* Purpose, optional */
-            "CHAR\r\n" +
-            /* Reference, optional */
-            "\r\n" +
-            /* Remittance information */
-            $"{remittance}\r\n" +
-            /* Hint */
-            string.Empty;
+        var barcodeContentBuilder = new StringBuilder();
 
-        return barcodeContent;
+        // service tag
+        barcodeContentBuilder.Append("BCD").Append(Br);
+        // version
+        barcodeContentBuilder.Append("002").Append(Br);
+        // character set
+        barcodeContentBuilder.Append((int)charSet).Append(Br);
+        // SEPA Credit Transfer
+        barcodeContentBuilder.Append("SCT").Append(Br);
+        // Recipient's BIC
+        barcodeContentBuilder.Append(bic).Append(Br);
+        /* Recipient's name */
+        barcodeContentBuilder.Append(beneficiary).Append(Br);
+        /* Recipient's IBAN */
+        barcodeContentBuilder.Append(iban).Append(Br);
+        /* Amount */
+        barcodeContentBuilder
+            .Append("EUR")
+            .Append(amount.ToString("F", CultureInfo.InvariantCulture))
+            .Append(Br);
+        /* Purpose, optional */
+        barcodeContentBuilder.Append("CHAR").Append(Br);
+        /* Reference, optional */
+        barcodeContentBuilder.Append(reference).Append(Br);
+        /* Remittance information */
+        barcodeContentBuilder.Append(remittance).Append(Br);
+        /* Hint */
+        barcodeContentBuilder.Append(string.Empty);
+
+        return barcodeContentBuilder.ToString();
     }
 
     /// <summary>
@@ -129,18 +143,18 @@ public class GiroCodeGenerator : IGiroCodeGenerator
         // ECC level needs to be "M" per specification
         var qrCodeData = qrGenerator.CreateQrCode(barcodeContent, QRCodeGenerator.ECCLevel.M);
         var qrCode = new PngByteQRCode(qrCodeData);
-        var qrCodeImage = qrCode.GetGraphic(_strokeWidth);
+        var qrCodeImage = qrCode.GetGraphic(StrokeWidth);
         var qrBitmap = SKBitmap.FromImage(SKImage.FromBitmap(SKBitmap.Decode(qrCodeImage)));
 
         // Generate canvas
-        var canvasBitmap = new SKBitmap(qrBitmap.Width, qrBitmap.Height + _yOffset);
+        var canvasBitmap = new SKBitmap(qrBitmap.Width, qrBitmap.Height + YOffset);
         var canvas = new SKCanvas(canvasBitmap);
 
         // Set whole canvas white
         canvas.DrawColor(SKColors.White);
 
         // Text settings
-        var textPoint = new SKPoint(qrBitmap.Width / 2f, _yOffset - _strokeWidth + (_textSize / 2));
+        var textPoint = new SKPoint(qrBitmap.Width / 2f, YOffset - StrokeWidth + (_textSize / 2f));
         var textPaint = new SKPaint
         {
             TextSize = _textSize,
@@ -155,7 +169,7 @@ public class GiroCodeGenerator : IGiroCodeGenerator
                 SKFontStyleSlant.Italic)
         };
 
-        var qrPoint = new SKPoint(0f, _yOffset);
+        var qrPoint = new SKPoint(0f, YOffset);
 
         canvas.DrawBitmap(qrBitmap, qrPoint);
 
@@ -163,15 +177,15 @@ public class GiroCodeGenerator : IGiroCodeGenerator
         var framePaint = new SKPaint
         {
             Style = SKPaintStyle.Stroke,
-            StrokeWidth = _strokeWidth,
+            StrokeWidth = StrokeWidth,
             Color = SKColors.Black,
             IsAntialias = true
         };
 
         canvas.DrawRoundRect(
-            _strokeWidth / 2f,
-            _yOffset - (_strokeWidth / 2f),
-            qrBitmap.Width - _strokeWidth,
+            StrokeWidth / 2f,
+            YOffset - (StrokeWidth / 2f),
+            qrBitmap.Width - StrokeWidth,
             qrBitmap.Height,
             20f,
             20f,
@@ -180,8 +194,8 @@ public class GiroCodeGenerator : IGiroCodeGenerator
         var textBounds = default(SKRect);
         _ = textPaint.MeasureText(_giroCodeText, ref textBounds);
 
-        textBounds.Left -= _strokeWidth;
-        textBounds.Right += _strokeWidth;
+        textBounds.Left -= StrokeWidth;
+        textBounds.Right += StrokeWidth;
         textBounds.Location = new SKPoint(textPoint.X - (textBounds.Width / 2), textPoint.Y - textBounds.Height);
 
         canvas.ClipRect(textBounds);
@@ -248,7 +262,7 @@ public class GiroCodeGenerator : IGiroCodeGenerator
     /// </summary>
     /// <param name="encoding">The encoding.</param>
     /// <param name="message">The message.</param>
-    /// <returns>bitman as byte array</returns>
+    /// <returns>bitmap as byte array</returns>
     private byte[] GetPayloadBytes(string encoding, string message)
     {
         var iso = Encoding.GetEncoding(encoding);

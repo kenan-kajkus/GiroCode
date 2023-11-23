@@ -46,7 +46,7 @@ public class GiroCodeGeneratorTest
     }
 
     [Fact]
-    public async Task GenerateGiroCoded_ShouldNotSuccess_WhenExceeds331Bytes()
+    public void GenerateGiroCoded_ShouldNotSuccess_WhenExceeds331Bytes()
     {
         var rem = "";
         for (var i = 0; i < 180; i++)
@@ -59,7 +59,8 @@ public class GiroCodeGeneratorTest
             "DE74500105176879856947",
             rem,
             1.44M,
-            "INGDDEFFXXX");
+            "INGDDEFFXXX",
+            "reference");
         
         var exceptionAssertions = a.Should().Throw<Exception>();
         exceptionAssertions.WithMessage("QrCodeCreationFailed");
